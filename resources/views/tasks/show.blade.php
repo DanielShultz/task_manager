@@ -33,6 +33,12 @@
                     <div>
                         Обновлено: {{ $task->updated_at }}
                     </div>
+                    <br>
+                    <div>
+                        @foreach ($task->labels as $label)
+                            #{{ $label->name }}
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>

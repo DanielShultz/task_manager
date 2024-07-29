@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\TaskStatus;
+use App\Models\Label;
+use App\Models\LabelTask;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -27,7 +29,8 @@ class TaskController extends Controller
         $task = new Task();
         $users = User::all();
         $statuses = TaskStatus::all();
-        return view('tasks.create', compact('task', 'users', 'statuses'));
+        $labels = Label::all();
+        return view('tasks.create', compact('task', 'users', 'statuses', 'labels'));
     }
 
     /**
@@ -40,6 +43,7 @@ class TaskController extends Controller
             'assigned' => 'nullable',
             'description' => 'nullable',
             'status' => 'required',
+            'labels' => 'nullable',
         ]);
         $task = new Task();
         if ($data['assigned'] !== '') {
@@ -50,6 +54,14 @@ class TaskController extends Controller
         $task->created_by_id = Auth::user()->id;
         $task->status_id = $data['status'];
         $task->save();
+
+        foreach ($data['labels'] as $label) {
+            $labelTask = new LabelTask();
+            $labelTask->task_id = $task->id;
+            $labelTask->label_id = $label;
+            $labelTask->save();
+        }
+
         return redirect()->route('tasks.index');
     }
 
@@ -68,7 +80,8 @@ class TaskController extends Controller
     {
         $users = User::all();
         $statuses = TaskStatus::all();
-        return view('tasks.edit', compact('task', 'users', 'statuses'));
+        $labels = Label::all();
+        return view('tasks.edit', compact('task', 'users', 'statuses', 'labels'));
     }
 
     /**
@@ -81,8 +94,8 @@ class TaskController extends Controller
             'assigned' => 'nullable',
             'description' => 'nullable',
             'status' => 'required',
+            'labels' => 'nullable',
         ]);
-        print_r($data);
         if ($data['assigned'] !== '') {
             $task->assigned_to_id = $data['assigned'];
         }
@@ -91,6 +104,15 @@ class TaskController extends Controller
         $task->created_by_id = Auth::user()->id;
         $task->status_id = $data['status'];
         $task->save();
+
+        LabelTask::where('task_id', $task->id)->delete();
+        foreach ($data['labels'] as $label) {
+            $labelTask = new LabelTask();
+            $labelTask->task_id = $task->id;
+            $labelTask->label_id = $label;
+            $labelTask->save();
+        }
+
         return redirect()->route('tasks.index');
     }
 
@@ -100,6 +122,7 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         if ($task) {
+            LabelTask::where('task_id', $task->id)->delete();
             $task->delete();
         }
         return redirect()->route('tasks.index');
