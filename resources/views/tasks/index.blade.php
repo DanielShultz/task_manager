@@ -7,13 +7,9 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <a href="{{ route('tasks.create') }}">
-                        {{ __('Создать задачу') }}
-                    </a>
-                </div>
-            </div>
+            <x-primary-link href="{{ route('tasks.create') }}">
+                {{ __('Создать задачу') }}
+            </x-primary-link>
         </div>
     </div>
 
@@ -39,7 +35,13 @@
                         Автор
                     </th>
                     <th scope="col" class="px-6 py-3">
+                        <span class="sr-only">Подробно</span>
+                    </th>
+                    <th scope="col" class="px-6 py-3">
                         <span class="sr-only">Изменить</span>
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        <span class="sr-only">Удалить</span>
                     </th>
                 </tr>
             </thead>
@@ -51,7 +53,7 @@
                             {{ $task->name }}
                         </th>
                         <td class="px-6 py-4">
-                            {{ $task->description }}
+                            {{ Str::limit($task->description, 100, '...') }}
                         </td>
                         <td class="px-6 py-4">
                             {{ $task->status->name }}
@@ -67,8 +69,23 @@
                             {{ $task->createdBy->name }}
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <a href="{{ route('tasks.edit', $task) }}"
-                                class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Изменить</a>
+                            <x-primary-link href="{{ route('tasks.show', $task) }}">
+                                {{ __('Подробно') }}
+                            </x-primary-link>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <x-primary-link href="{{ route('tasks.edit', $task) }}">
+                                {{ __('Изменить') }}
+                            </x-primary-link>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <form action="{{ route('tasks.destroy', $task) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <x-danger-button>
+                                    {{ __('Удалить') }}
+                                </x-danger-button>
+                            </form>
                         </td>
                     </tr>
                 @endforeach
