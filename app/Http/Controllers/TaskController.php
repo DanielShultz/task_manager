@@ -41,7 +41,6 @@ class TaskController extends Controller
             "description" => "nullable",
             "status" => "required",
         ]);
-        print_r($data);
         $task = new Task();
         if ($data["assigned"] !== "") {
             $task->assigned_to_id = $data["assigned"];
@@ -67,7 +66,9 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        //
+        $users = User::all();
+        $statuses = TaskStatus::all();
+        return view("tasks.edit", compact("task", "users", "statuses"));
     }
 
     /**
@@ -75,7 +76,22 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        //
+        $data = $request->validate([
+            "name" => "required|min:5",
+            "assigned" => "nullable",
+            "description" => "nullable",
+            "status" => "required",
+        ]);
+        print_r($data);
+        if ($data["assigned"] !== "") {
+            $task->assigned_to_id = $data["assigned"];
+        }
+        $task->name = $data["name"];
+        $task->description = $data["description"];
+        $task->created_by_id = Auth::user()->id;
+        $task->status_id = $data["status"];
+        $task->save();
+        return redirect()->route("tasks.index");
     }
 
     /**
