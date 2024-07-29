@@ -22,7 +22,12 @@
                         Статус: {{ $task->status->name }}
                     </div>
                     <div>
-                        Исполнитель: {{ $task->assignedTo->name }}
+                        Исполнитель:
+                        @if ($task->assignedTo === null)
+                            Нет исполнителя
+                        @else
+                            {{ $task->assignedTo->name }}
+                        @endif
                     </div>
                     <div>
                         Автор: {{ $task->createdBy->name }}
